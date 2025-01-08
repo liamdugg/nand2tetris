@@ -1,6 +1,7 @@
 // This file is part of www.nand2tetris.org
 // and the book "The Elements of Computing Systems"
 // by Nisan and Schocken, MIT Press.
+// File name: projects/3/a/RAM64.hdl
 /**
  * Memory of sixty four 16-bit registers.
  * If load is asserted, the value of the register selected by
@@ -12,5 +13,39 @@ CHIP RAM64 {
     OUT out[16];
 
     PARTS:
-    //// Replace this comment with your code.
+    
+    // Divide address input into the 8RAM block addressing
+    // and the 8 register addresses. (NOT NECESSARY, just for more clarity)
+    And16(a[0..5]=address, b[0..5]=address, 
+        out[0..2]=regaddr, 
+        out[3..5]=ramaddr
+    );
+
+    // select to which ram to propagate load bit to.
+    DMux8Way(
+        in=load,   sel=ramaddr,
+        a=ramsel0, b=ramsel1,
+        c=ramsel2, d=ramsel3,
+        e=ramsel4, f=ramsel5,
+        g=ramsel6, h=ramsel7
+    );
+
+    // create ram blocks
+    RAM8(in=in, load=ramsel0, address=regaddr, out=ram0);
+    RAM8(in=in, load=ramsel1, address=regaddr, out=ram1);
+    RAM8(in=in, load=ramsel2, address=regaddr, out=ram2);
+    RAM8(in=in, load=ramsel3, address=regaddr, out=ram3);
+    RAM8(in=in, load=ramsel4, address=regaddr, out=ram4);
+    RAM8(in=in, load=ramsel5, address=regaddr, out=ram5);
+    RAM8(in=in, load=ramsel6, address=regaddr, out=ram6);
+    RAM8(in=in, load=ramsel7, address=regaddr, out=ram7);
+
+    // select which ram output to propagate to out.
+    Mux8Way16(
+        a=ram0, b=ram1, 
+        c=ram2, d=ram3, 
+        e=ram4, f=ram5, 
+        g=ram6, h=ram7, 
+        sel=ramaddr, out=out
+    );
 }

@@ -1,6 +1,7 @@
 // This file is part of www.nand2tetris.org
 // and the book "The Elements of Computing Systems"
 // by Nisan and Schocken, MIT Press.
+// File name: projects/3/a/PC.hdl
 /**
  * A 16-bit counter.
  * if      reset(t): out(t+1) = 0
@@ -9,9 +10,27 @@
  * else              out(t+1) = out(t)
  */
 CHIP PC {
-    IN in[16],inc, load, reset;
+    IN in[16], reset, load, inc;
     OUT out[16];
     
     PARTS:
-    //// Replace this comment with your code.
+
+    // generate incremented output
+    Inc16(in=regOut, out=regOutInc);
+
+    // select output or output+1 with inc bit
+    Mux16(a=regOut, b=regOutInc, sel=inc, out=muxOut1);
+    
+    // select output or new input with load bit
+    Mux16(a=muxOut1, b=in, sel=load, out=muxOut2);
+    
+    // select reset or output of second mux.
+    Mux16(a=muxOut2, b=false, sel=reset, out=regIn);
+    
+    // regOut updated if load==1 or reset==1 or inc==1
+    Or(a=load, b=reset, out=Or1);
+    Or(a=inc, b=Or1, out=regLoad);
+
+    Register(in=regIn, load=regLoad, out=regOut);
+    Or16(a=false, b=regOut, out=out); // aux for output
 }
